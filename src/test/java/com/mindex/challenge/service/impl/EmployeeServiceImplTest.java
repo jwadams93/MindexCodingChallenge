@@ -1,6 +1,7 @@
 package com.mindex.challenge.service.impl;
 
 import com.mindex.challenge.data.Employee;
+import com.mindex.challenge.data.ReportingStructure;
 import com.mindex.challenge.service.EmployeeService;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,8 +80,9 @@ public class EmployeeServiceImplTest {
 
     @Test
     public void testCalculateNumberOfReports() {
-        Employee john = employeeService.read("16a596ae-edd3-4847-99fe-c4518e82c86f");
-        assertEquals("Engineering", john.getDepartment());
+       ReportingStructure numberOfReports = employeeService.getReportingStructure("16a596ae-edd3-4847-99fe-c4518e82c86f");
+       assertEquals(4, numberOfReports.getNumberOfReports());
+       assertEquals("John", numberOfReports.getEmployee().getFirstName());
     }
 
     private static void assertEmployeeEquivalence(Employee expected, Employee actual) {

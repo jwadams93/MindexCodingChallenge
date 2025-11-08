@@ -70,10 +70,9 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return
      */
     private int calculateNumberOfReports(Employee employee) {
-        int numberOfReports = 0;
 
         /**
-         * Thought Process
+         * Thought Process Task 1
          * I need to iterate through the direct reports of the provided employee,
          * and recursively through their reports which could either be an employee id
          * or potentially an object representing the employee record
@@ -81,7 +80,36 @@ public class EmployeeServiceImpl implements EmployeeService {
          * for each valid report, numberOfReports++
          */
 
-        return numberOfReports;
-    }
+        // I chose to stream elements of the direct reports array here MOSTLY because
+        // after working with RXjava professionally for so many years,
+        // I find this way more comfortable and readable :)
 
+        //However there _are_ some benefits here worth noting,
+        // .sum handles null/empty automatically (stream().sum on an empty stream = 0)
+        // and I was able to add parallelism much easier,
+        // which doesn't save much time here,
+        // but would certainly make a difference across a large org chart.
+
+        //this also makes future changes much easier, if say we wanted to
+        //filter to see direct reports of a certain department
+
+        //Null check first to avoid a NPE on checking if empty
+        if (employee.getDirectReports() == null || employee.getDirectReports().isEmpty()) {
+            LOG.debug("No direct reports found for employee [{}]", employee.getFirstName());
+            return 0;
+        }
+
+        return employee.getDirectReports().parallelStream()
+                .mapToInt(report -> {
+                    //report could be an Employee, or as we see in the test data, just an employeeId.
+                    Employee fullReport;
+                    if (report.getFirstName() == null) {
+                        fullReport = read(report.getEmployeeId());
+                    } else {
+                        fullReport = report;
+                    }
+                    return 1 + calculateNumberOfReports(fullReport);
+                })
+                .sum();
+    }
 }
