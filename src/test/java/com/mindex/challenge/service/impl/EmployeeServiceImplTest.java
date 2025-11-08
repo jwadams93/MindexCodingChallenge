@@ -16,8 +16,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -80,9 +79,36 @@ public class EmployeeServiceImplTest {
 
     @Test
     public void testCalculateNumberOfReports() {
-       ReportingStructure numberOfReports = employeeService.getReportingStructure("16a596ae-edd3-4847-99fe-c4518e82c86f");
+       ReportingStructure numberOfReports = employeeService
+               .getReportingStructure("16a596ae-edd3-4847-99fe-c4518e82c86f");
        assertEquals(4, numberOfReports.getNumberOfReports());
        assertEquals("John", numberOfReports.getEmployee().getFirstName());
+    }
+
+    @Test
+    public void testCalculateNumberOfReportsWhenNoReports() {
+        ReportingStructure report = employeeService
+                .getReportingStructure("b7839309-3348-463b-a7e3-5de1c168beb3");
+        assertEquals(0, report.getNumberOfReports());
+        assertEquals("Paul", report.getEmployee().getFirstName());
+    }
+
+    @Test
+    public void testCalculateNumberOfReportsWhenNoEmployee() {
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> employeeService.getReportingStructure(""));
+        assertTrue(exception.getMessage().contains("Invalid employeeId"));
+    }
+
+    @Test
+    public void testCalculateNumberPopulatedAsExpected() {
+       ReportingStructure reportingStructure = employeeService
+               .getReportingStructure("16a596ae-edd3-4847-99fe-c4518e82c86f");
+       assertEquals(4, reportingStructure.getNumberOfReports());
+       assertEquals("John", reportingStructure.getEmployee().getFirstName());
+       assertEquals("Lennon", reportingStructure.getEmployee().getLastName());
+       assertEquals("Engineering", reportingStructure.getEmployee().getDepartment());
+       assertEquals("Development Manager", reportingStructure.getEmployee().getPosition());
     }
 
     private static void assertEmployeeEquivalence(Employee expected, Employee actual) {
