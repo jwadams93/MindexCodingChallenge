@@ -64,10 +64,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
+     * Recursively calculates the total number of reports (direct and indirect)
+     * for a given employee.
      *
+     * This method handles the case where the employee's direct reports list may
+     * contain either fully or populated employee objects or just employee ids.
      *
-     * @param employee
-     * @return
+     * Edge cases:
+     * If the employee has no direct reports, returns 0.
+     * If a direct report is invalid or cannot be resolved, that branch is counted as 0.
+     *
+     * @param employee the employee whose reporting hierarchy is being counted.
+     * @return the total number of direct and indirect reports under the given employee.
      */
     private int calculateNumberOfReports(Employee employee) {
 
@@ -104,8 +112,10 @@ public class EmployeeServiceImpl implements EmployeeService {
                     //report could be an Employee, or as we see in the test data, just an employeeId.
                     Employee fullReport;
                     if (report.getFirstName() == null) {
+                        LOG.debug("Unpopulated report found for employee: [{}]. Checking db", employee.getEmployeeId());
                         fullReport = read(report.getEmployeeId());
                     } else {
+                        LOG.debug("Populated report found for [{}].", employee.getEmployeeId());
                         fullReport = report;
                     }
                     return 1 + calculateNumberOfReports(fullReport);
