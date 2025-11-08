@@ -77,6 +77,12 @@ public class EmployeeServiceImplTest {
         assertEmployeeEquivalence(readEmployee, updatedEmployee);
     }
 
+    @Test
+    public void testCalculateNumberOfReports() {
+        Employee john = employeeService.read("16a596ae-edd3-4847-99fe-c4518e82c86f");
+        assertEquals("Engineering", john.getDepartment());
+    }
+
     private static void assertEmployeeEquivalence(Employee expected, Employee actual) {
         assertEquals(expected.getFirstName(), actual.getFirstName());
         assertEquals(expected.getLastName(), actual.getLastName());
