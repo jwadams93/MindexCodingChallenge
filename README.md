@@ -1,3 +1,27 @@
+# Testing AC
+
+### Task 1
+Create a large heirarchy of direct and indirect reports
+<img width="1831" height="1120" alt="mindexAC1" src="https://github.com/user-attachments/assets/b3ddf74b-d931-47a8-b752-da97833de3ea" />
+
+Reading the Reporting Structure back shows Employee data, and the number of direct and indirect reporters (5). This data is not persisted and rather calculated on the fly
+<img width="1841" height="1120" alt="mindexAC2" src="https://github.com/user-attachments/assets/2edad182-9006-407c-9e2d-efadca74b497" />
+
+### Task 2
+Create a compensation for employee 33a
+<img width="1830" height="1125" alt="mindexAC_Task2_pt1" src="https://github.com/user-attachments/assets/788cd627-92ec-4c97-8e21-ade6c271f2bf" />
+
+Read back the compensation
+<img width="1833" height="1078" alt="mindexAC_Task2_pt2" src="https://github.com/user-attachments/assets/c5b864fe-9da5-4205-a1b8-47f5441e4b3d" />
+
+Add another compensation for employee 33a
+<img width="1884" height="1125" alt="mindexAC_Task2_addAnotherSalary" src="https://github.com/user-attachments/assets/98caafea-2eaf-4399-aa33-84bcb077f4d6" />
+
+Read back 33a's compensation. What's displayed now is a compensation history.
+<img width="1833" height="1119" alt="mindexAC_Task2_readForCompensationHistory" src="https://github.com/user-attachments/assets/26b324cc-ec84-4208-a252-00164a8f4cd1" />
+
+
+
 # Coding Challenge
 ## What's Provided
 A simple [Spring Boot](https://projects.spring.io/spring-boot/) web application has been created and bootstrapped with data. The application contains 
@@ -105,3 +129,4 @@ persist and fetch `Compensation` data for a specific `Employee` using the persis
 
 ## Delivery
 Please upload your results to a publicly accessible Git repo. Free ones are provided by GitHub and Bitbucket.
+
