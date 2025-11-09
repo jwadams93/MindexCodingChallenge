@@ -16,6 +16,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
@@ -24,6 +27,7 @@ public class EmployeeServiceImplTest {
 
     private String employeeUrl;
     private String employeeIdUrl;
+    private String directReportsUrl;
 
     @Autowired
     private EmployeeService employeeService;
@@ -38,6 +42,7 @@ public class EmployeeServiceImplTest {
     public void setup() {
         employeeUrl = "http://localhost:" + port + "/employee";
         employeeIdUrl = "http://localhost:" + port + "/employee/{id}";
+        directReportsUrl = "http://localhost:" + port + "/employee/{id}/reportingStructure";
     }
 
     @Test
@@ -78,11 +83,86 @@ public class EmployeeServiceImplTest {
     }
 
     @Test
+    public void testReadReportStructure() {
+        Employee newEmployee = new Employee();
+        newEmployee.setFirstName("Gandalf");
+        newEmployee.setLastName("TheGrey");
+        newEmployee.setDepartment("Wizarding");
+        newEmployee.setPosition("Wizard");
+
+        // Create checks
+        Employee createdNewEmployee = restTemplate.postForEntity(employeeUrl, newEmployee, Employee.class).getBody();
+
+        assertNotNull(createdNewEmployee.getEmployeeId());
+        assertEmployeeEquivalence(newEmployee, createdNewEmployee);
+
+        // Read checks
+        Employee readNewEmployee = restTemplate.getForEntity(employeeIdUrl, Employee.class, createdNewEmployee.getEmployeeId()).getBody();
+        assertEquals(createdNewEmployee.getEmployeeId(), readNewEmployee.getEmployeeId());
+        assertEmployeeEquivalence(createdNewEmployee, readNewEmployee);
+
+        //Create new top-of-hierarchy employee
+        List<Employee> directReports = new ArrayList<>();
+        directReports.add(createdNewEmployee);
+
+        Employee newestEmployee = new Employee();
+        newestEmployee.setFirstName("Jake");
+        newestEmployee.setLastName("Adams");
+        newestEmployee.setDepartment("Engineering");
+        newestEmployee.setPosition("Developer");
+        newestEmployee.setDirectReports(directReports);
+
+        Employee createdNewestEmployee = restTemplate.postForEntity(employeeUrl, newestEmployee, Employee.class).getBody();
+
+        assertNotNull(createdNewestEmployee.getEmployeeId());
+        assertEmployeeEquivalence(newestEmployee, createdNewestEmployee);
+
+        // Read newest employee
+        Employee readNewestEmployee = restTemplate.getForEntity(employeeIdUrl, Employee.class, createdNewestEmployee.getEmployeeId()).getBody();
+        assertEquals(createdNewestEmployee.getEmployeeId(), readNewestEmployee.getEmployeeId());
+        assertEmployeeEquivalence(createdNewestEmployee, readNewestEmployee);
+
+        // Get the reporting structure
+        ReportingStructure reportingStructure = restTemplate.getForEntity(directReportsUrl,
+                ReportingStructure.class,
+                readNewestEmployee.getEmployeeId()).getBody();
+
+        assertEquals(1, reportingStructure.getNumberOfReports());
+    }
+
+    @Test
+    public void testReadReportStructureNoReportingEmployees() {
+        Employee newEmployee = new Employee();
+        newEmployee.setFirstName("Gandalf");
+        newEmployee.setLastName("TheGrey");
+        newEmployee.setDepartment("Wizarding");
+        newEmployee.setPosition("Wizard");
+
+        // Create checks
+        Employee createdNewEmployee = restTemplate.postForEntity(employeeUrl, newEmployee, Employee.class).getBody();
+
+        assertNotNull(createdNewEmployee.getEmployeeId());
+        assertEmployeeEquivalence(newEmployee, createdNewEmployee);
+
+        // Read checks
+        Employee readNewEmployee = restTemplate.getForEntity(employeeIdUrl, Employee.class, createdNewEmployee.getEmployeeId()).getBody();
+        assertEquals(createdNewEmployee.getEmployeeId(), readNewEmployee.getEmployeeId());
+        assertEmployeeEquivalence(createdNewEmployee, readNewEmployee);
+
+        // Get the reporting structure
+        ReportingStructure reportingStructure = restTemplate.getForEntity(directReportsUrl,
+                ReportingStructure.class,
+                readNewEmployee.getEmployeeId()).getBody();
+
+        assertEquals(0, reportingStructure.getNumberOfReports());
+    }
+
+    @Test
     public void testCalculateNumberOfReports() {
-       ReportingStructure numberOfReports = employeeService
-               .getReportingStructure("16a596ae-edd3-4847-99fe-c4518e82c86f");
-       assertEquals(4, numberOfReports.getNumberOfReports());
-       assertEquals("John", numberOfReports.getEmployee().getFirstName());
+        ReportingStructure numberOfReports = employeeService
+                .getReportingStructure("16a596ae-edd3-4847-99fe-c4518e82c86f");
+        assertEquals(4, numberOfReports.getNumberOfReports());
+        assertEquals("John", numberOfReports.getEmployee().getFirstName());
     }
 
     @Test
@@ -102,13 +182,13 @@ public class EmployeeServiceImplTest {
 
     @Test
     public void testCalculateNumberPopulatedAsExpected() {
-       ReportingStructure reportingStructure = employeeService
-               .getReportingStructure("16a596ae-edd3-4847-99fe-c4518e82c86f");
-       assertEquals(4, reportingStructure.getNumberOfReports());
-       assertEquals("John", reportingStructure.getEmployee().getFirstName());
-       assertEquals("Lennon", reportingStructure.getEmployee().getLastName());
-       assertEquals("Engineering", reportingStructure.getEmployee().getDepartment());
-       assertEquals("Development Manager", reportingStructure.getEmployee().getPosition());
+        ReportingStructure reportingStructure = employeeService
+                .getReportingStructure("16a596ae-edd3-4847-99fe-c4518e82c86f");
+        assertEquals(4, reportingStructure.getNumberOfReports());
+        assertEquals("John", reportingStructure.getEmployee().getFirstName());
+        assertEquals("Lennon", reportingStructure.getEmployee().getLastName());
+        assertEquals("Engineering", reportingStructure.getEmployee().getDepartment());
+        assertEquals("Development Manager", reportingStructure.getEmployee().getPosition());
     }
 
     private static void assertEmployeeEquivalence(Employee expected, Employee actual) {

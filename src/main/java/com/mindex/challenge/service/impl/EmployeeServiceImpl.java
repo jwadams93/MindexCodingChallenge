@@ -49,10 +49,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
+     * Reads the employee for the provided employee Id.
+     * Then calls calculateNumberOfReports to recursively find the
+     * number of employees that directly or indirectly report to this employee
      *
-     *
-     * @param employeeId
-     * @return
+     * @param employeeId The employee whose reporting structure is being retrieved
+     * @return the reporting structure for the given employee.
      */
     @Override
     public ReportingStructure getReportingStructure(String employeeId) {
